@@ -3,17 +3,17 @@ import {
     ManifestOperation,
     ManifestSubscription,
     OperationRequestType,
-    Resource,
+    Resource
 } from "@aidbox/node-server-sdk";
-import { create, IPFS } from "ipfs-core";
-import AWS from "aws-sdk";
 import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
+import AWS from "aws-sdk";
+import { create, IPFS } from "ipfs-core";
 
 export interface AwsConfig {
-    bucketName: string | undefined;
-    region: string | undefined;
-    accessKeyId: string | undefined;
-    secretAccessKey: string | undefined;
+    bucketName?: string;
+    region?: string;
+    accessKeyId?: string;
+    secretAccessKey?: string;
 }
 
 const bucketName = process.env.AWS_BUCKET_NAME;
@@ -42,10 +42,10 @@ export type THelpers = {
     s3: AWS.S3;
     config: {
         aws: {
-            bucketName: string | undefined;
-            region: string | undefined;
-            accessKeyId: string | undefined;
-            secretAccessKey: string | undefined;
+            bucketName?: string;
+            region?: string;
+            accessKeyId?: string;
+            secretAccessKey?: string;
         };
         hedera: {
             hederaAccountId: AccountId;
@@ -53,7 +53,7 @@ export type THelpers = {
             hederaTreasuryId: AccountId;
             hederaTreasuryKey: PrivateKey;
         };
-        dicomToPngUrl: string | undefined;
+        dicomToPngUrl?: string;
     };
 };
 
