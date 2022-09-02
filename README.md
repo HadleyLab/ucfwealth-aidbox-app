@@ -11,5 +11,6 @@ docker compose logs app -f
 
 ## Restart container 
 ```docker
+docker compose restart sdc
 docker compose restart app
 ```
