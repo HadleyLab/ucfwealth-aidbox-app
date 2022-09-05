@@ -6,3 +6,4 @@ pgdata
 src/config.ts
 dcm-to-png
 .npmrc
+.log

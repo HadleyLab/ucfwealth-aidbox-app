@@ -214,6 +214,10 @@ export const Mapping = {
 
 export const Questionnaire = {
     "personal-information": {
+        meta: {
+           profile: ["http://covidimaging.com/questionnaire"]
+        },
+        url: "personal-information",
         resourceType: "Questionnaire",
         id: "covid-19-personal-information",
         title: "Participant personal information",
@@ -324,6 +328,10 @@ export const Questionnaire = {
         ],
     },
     "screening-questions": {
+        url: "screening-questions",
+        meta: {
+           profile: ["http://covidimaging.com/questionnaire"]
+        },
         resourceType: "Questionnaire",
         id: "screening-questions",
         title: "Pre encunter covid-19 screening questions",
@@ -1352,9 +1360,7 @@ export const Questionnaire = {
     "patient-report-baseline": {
         date: "2022-08-05T13:11:42+00:00",
         meta: {
-            lastUpdated: "2022-08-16T02:21:26.959745Z",
-            createdAt: "2022-08-16T02:21:26.959745Z",
-            versionId: "23096",
+            profile: ["http://covidimaging.com/questionnaire"]
         },
         publisher: "ICHOM",
         jurisdiction: [
