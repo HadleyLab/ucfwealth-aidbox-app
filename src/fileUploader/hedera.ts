@@ -232,12 +232,14 @@ export const associateAndTransferNFT = async (
 ) => {
     const accountId = AccountId.fromString(patientAccountId);
     const accountKey = PrivateKey.fromString(patientAccountKey);
+    console.log('associate user account with NFT in progress')
     await associateUserAccountWithNFT(
         tokenId,
         accountId,
         accountKey,
         hederaClient
     );
+    console.log('transfer NFT in progress')
     await transferNFT(
         tokenId,
         accountId,
@@ -246,5 +248,7 @@ export const associateAndTransferNFT = async (
         hederaTreasuryKey,
         hederaClient
     );
+    console.log('associate user account with NFT and transfer completed')
     await patientBalanceCheck(accountId, tokenId, hederaClient);
+    return;
 };

@@ -72,7 +72,7 @@ export const test: TOperation<{ resource: { active: boolean } }> = {
                 _count: 3,
             });
         console.log({ patientsTotal, patients });
-        console.log(helpers.node);
+        console.log(await helpers.node);
 
         // Test log
         console.log("Testing log");
@@ -266,32 +266,59 @@ export const apiCreateNft: TOperation = {
             });
         const hederaAccountId = hederaAccount[0].accountId;
         const hederaAccountKey = hederaAccount[0].accountKey;
-        if (!helpers.config.dicomToPngUrl) {
-            console.error("Dicom to png url is missed")
-            return { status: 500 }
-        }
-        const { tokenId, CID } = await createNft(
-            patientId,
-            helpers.node,
-            helpers.s3,
-            helpers.hederaClient,
-            helpers.config.hedera.hederaTreasuryId,
-            helpers.config.hedera.hederaTreasuryKey,
-            helpers.config.aws,
-            helpers.config.dicomToPngUrl
+        const { resources } = await helpers.findResources<any>(
+            "ResultCreationNft",
+            {
+                _ilike: patientId,
+            }
         );
-        if (!tokenId) {
-            return { status: 500 };
+        if (resources.length === 0) {
+            await ctx.api.createResource<any>("ResultCreationNft", {
+                status: 'in-progress',
+                patient: { id: patientId, resourceType: 'Patient' },
+                id: patientId,
+            });
+        } else {
+            await ctx.api.patchResource<any>("ResultCreationNft", patientId, {
+                status: 'in-progress',
+                patient: { id: patientId, resourceType: 'Patient' },
+                id: patientId,
+            });
         }
-        await associateAndTransferNFT(
-            tokenId,
-            hederaAccountId,
-            hederaAccountKey,
-            CID,
-            helpers.config.hedera.hederaTreasuryId,
-            helpers.config.hedera.hederaTreasuryKey,
-            helpers.hederaClient
-        );
-        return { resource: { tokenId: tokenId.toString() } };
+        const runCreateNftProcess = async () => {
+            if (!helpers.config.dicomToPngUrl) {
+                console.error("Dicom to png url is missed");
+                return { status: 500 };
+            }
+            const { tokenId, CID } = await createNft(
+                patientId,
+                await helpers.node,
+                helpers.s3,
+                helpers.hederaClient,
+                helpers.config.hedera.hederaTreasuryId,
+                helpers.config.hedera.hederaTreasuryKey,
+                helpers.config.aws,
+                helpers.config.dicomToPngUrl
+            );
+            if (!tokenId) {
+                return { status: 500 };
+            }
+            await associateAndTransferNFT(
+                tokenId,
+                hederaAccountId,
+                hederaAccountKey,
+                CID,
+                helpers.config.hedera.hederaTreasuryId,
+                helpers.config.hedera.hederaTreasuryKey,
+                helpers.hederaClient
+            );
+            await ctx.api.patchResource<any>("ResultCreationNft", patientId, {
+                status: 'completed',
+                patient: { id: patientId, resourceType: 'Patient' },
+                id: patientId,
+            });
+        };
+        runCreateNftProcess();
+        return { resource: { text: "NFT in the making" } };
     },
 };

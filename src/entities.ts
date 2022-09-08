@@ -1,21 +1,41 @@
 export const HederaAccount = {
     attrs: {
-        patientId: { type: "string" },
+        patient: {
+            type: "Reference",
+            search: { name: "patient", type: "reference" },
+            isRequired: true,
+            refers: ["Patient"],
+        },
         accountId: { type: "string" },
         accountKey: { type: "string" },
     },
 };
 
-export const QuestionnaireSettings = {
+export const PatientSettings = {
     attrs: {
-        personalInfo: { type: "string" },
-        questionnaireList: { type: "string" },
+        patient: {
+            type: "Reference",
+            search: { name: "patient", type: "reference" },
+            isRequired: true,
+            refers: ["Patient"],
+        },
+        questionnaire: {
+            type: "Reference",
+            search: { name: "questionnaire", type: "reference" },
+            isRequired: true,
+            refers: ["Questionnaire"],
+        },
     },
 };
 
-export const PatientSettings = {
+export const ResultCreationNft = {
     attrs: {
-        patientId: { type: "string" },
-        selectedQuestionnaire: { type: "string" },
+        status: { type: "string" },
+        patient: {
+            type: "Reference",
+            search: { name: "patient", type: "reference" },
+            isRequired: true,
+            refers: ["Patient"],
+        },
     },
 };

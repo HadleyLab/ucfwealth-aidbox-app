@@ -107,15 +107,6 @@ export const SearchParameter = {
     },
 };
 
-export const QuestionnaireSettings = {
-    active: {
-        personalInfo: "personal-information",
-        questionnaireList: "screening-questions patient-report-baseline",
-        id: "active",
-        resourceType: "QuestionnaireSettings",
-    },
-};
-
 export const Mapping = {
     "patient-extract": {
         resourceType: "Mapping",

@@ -3,7 +3,7 @@ import {
     ManifestOperation,
     ManifestSubscription,
     OperationRequestType,
-    Resource
+    Resource,
 } from "@aidbox/node-server-sdk";
 import { AccountId, Client, PrivateKey } from "@hashgraph/sdk";
 import AWS from "aws-sdk";
@@ -37,7 +37,7 @@ export type THelpers = {
         resourceType: string,
         resourceId: string
     ): Promise<R>;
-    node: IPFS;
+    node: Promise<IPFS>;
     hederaClient: Client;
     s3: AWS.S3;
     config: {
@@ -57,10 +57,15 @@ export type THelpers = {
     };
 };
 
-export const createHelpers = async (ctx: Ctx): Promise<THelpers> => {
+const initIPFS = async () => {
     const node = await create({ repo: process.env.IPFS_PATH });
     const version = await node.version();
     console.log("ipfs run version", version.version);
+    return node;
+};
+
+export const createHelpers = async (ctx: Ctx): Promise<THelpers> => {
+    const node = initIPFS();
 
     AWS.config.update({
         region,
