@@ -30,7 +30,7 @@ export const PatientSettings = {
 
 export const ResultCreationNft = {
     attrs: {
-        status: { type: "string" },
+        status: { type: "string", enum: ["in-progress", "completed"] },
         patient: {
             type: "Reference",
             search: { name: "patient", type: "reference" },
