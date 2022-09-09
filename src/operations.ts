@@ -255,6 +255,34 @@ export const apiCreateHederaAccount: TOperation = {
     },
 };
 
+export const apiSetInProgressCreateNft: TOperation = {
+    method: "GET",
+    path: ["$set-in-progress-create-nft"],
+    handlerFn: async (req, { ctx, helpers }) => {
+        const patientId = req.params.patientId;
+        const { resources } = await helpers.findResources<any>(
+            "ResultCreationNft",
+            {
+                _ilike: patientId,
+            }
+        );
+        if (resources.length === 0) {
+            await ctx.api.createResource<any>("ResultCreationNft", {
+                status: "in-progress",
+                patient: { id: patientId, resourceType: "Patient" },
+                id: patientId,
+            });
+        } else {
+            await ctx.api.patchResource<any>("ResultCreationNft", patientId, {
+                status: "in-progress",
+                patient: { id: patientId, resourceType: "Patient" },
+                id: patientId,
+            });
+        }
+        return { resource: { status: "in-progress" } };
+    },
+};
+
 export const apiCreateNft: TOperation = {
     method: "GET",
     path: ["$create-nft"],
@@ -266,25 +294,6 @@ export const apiCreateNft: TOperation = {
             });
         const hederaAccountId = hederaAccount[0].accountId;
         const hederaAccountKey = hederaAccount[0].accountKey;
-        const { resources } = await helpers.findResources<any>(
-            "ResultCreationNft",
-            {
-                _ilike: patientId,
-            }
-        );
-        if (resources.length === 0) {
-            await ctx.api.createResource<any>("ResultCreationNft", {
-                status: 'in-progress',
-                patient: { id: patientId, resourceType: 'Patient' },
-                id: patientId,
-            });
-        } else {
-            await ctx.api.patchResource<any>("ResultCreationNft", patientId, {
-                status: 'in-progress',
-                patient: { id: patientId, resourceType: 'Patient' },
-                id: patientId,
-            });
-        }
         const runCreateNftProcess = async () => {
             if (!helpers.config.dicomToPngUrl) {
                 console.error("Dicom to png url is missed");
@@ -313,12 +322,14 @@ export const apiCreateNft: TOperation = {
                 helpers.hederaClient
             );
             await ctx.api.patchResource<any>("ResultCreationNft", patientId, {
-                status: 'completed',
-                patient: { id: patientId, resourceType: 'Patient' },
+                status: "completed",
+                patient: { id: patientId, resourceType: "Patient" },
                 id: patientId,
             });
         };
         runCreateNftProcess();
-        return { resource: { text: `Creating an NFT for a patient ${patientId}` } };
+        return {
+            resource: { text: `Creating an NFT for a patient ${patientId}` },
+        };
     },
 };
