@@ -319,6 +319,6 @@ export const apiCreateNft: TOperation = {
             });
         };
         runCreateNftProcess();
-        return { resource: { text: "NFT in the making" } };
+        return { resource: { text: `Creating an NFT for a patient ${patientId}` } };
     },
 };
