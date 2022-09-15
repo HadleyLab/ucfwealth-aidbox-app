@@ -4,6 +4,7 @@
     "description": "",
     "main": "build/src/index.js",
     "scripts": {
+        "start": "ts-node src/index.ts",
         "dev": "DEBUG=@aidbox/node-app:*  nodemon"
     },
     "keywords": [],
