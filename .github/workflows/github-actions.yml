@@ -30,9 +30,11 @@ jobs:
       environment: Staging
       runs-on: ubuntu-latest
       #needs: ["Build"]
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       steps:
         - run: python -m pip install --upgrade awscli
         - run: curl -LO "https://dl.k8s.io/release/v1.25.1/bin/linux/amd64/kubectl"
         - run: aws eks --region us-east-2 update-kubeconfig --name  hadleylaboratory
         - run: kubectl --namespace staging rollout restart deployment.apps/backend
-
