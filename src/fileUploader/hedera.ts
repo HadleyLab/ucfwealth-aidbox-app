@@ -70,7 +70,13 @@ export const createNft = async (
         .setFallbackFee(new CustomFixedFee().setHbarAmount(new Hbar(1)));
 
     // IPFS CONTENT IDENTIFIERS FOR WHICH WE WILL CREATE NFTs
-    const CID = (await getCidArray(patientId, node, s3, awsConfig, dicomToPngUrl)) as string[];
+    const CID = (await getCidArray(
+        patientId,
+        node,
+        s3,
+        awsConfig,
+        dicomToPngUrl
+    )) as string[];
 
     console.log("CID array:", CID);
 
@@ -85,6 +91,7 @@ export const createNft = async (
         .setSupplyType(TokenSupplyType.Finite)
         .setMaxSupply(CID.length)
         .setCustomFees([nftCustomFee])
+        .setMaxTransactionFee(new Hbar(100))
         .setAdminKey(adminKey)
         .setSupplyKey(supplyKey)
         // .setPauseKey(pauseKey)
@@ -232,14 +239,14 @@ export const associateAndTransferNFT = async (
 ) => {
     const accountId = AccountId.fromString(patientAccountId);
     const accountKey = PrivateKey.fromString(patientAccountKey);
-    console.log('associate user account with NFT in progress')
+    console.log("associate user account with NFT in progress");
     await associateUserAccountWithNFT(
         tokenId,
         accountId,
         accountKey,
         hederaClient
     );
-    console.log('transfer NFT in progress')
+    console.log("transfer NFT in progress");
     await transferNFT(
         tokenId,
         accountId,
@@ -248,7 +255,7 @@ export const associateAndTransferNFT = async (
         hederaTreasuryKey,
         hederaClient
     );
-    console.log('associate user account with NFT and transfer completed')
+    console.log("associate user account with NFT and transfer completed");
     await patientBalanceCheck(accountId, tokenId, hederaClient);
     return;
 };
