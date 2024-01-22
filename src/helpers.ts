@@ -4,8 +4,8 @@ import { Storage, Bucket } from "@google-cloud/storage";
 import { create, IPFS } from "ipfs-core";
 
 const dicomToPngUrl = process.env.DCM_TO_PNG_URL;
-const googleProjectId = "googleProjectId";
-const googleBucketName = "googleBucketName";
+const googleProjectId = process.env.GOOGLE_PROJECT_ID;
+const googleBucketName = process.env.GOOGLE_BUCKET_NAME;
 const googleKeyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
 export type GoogleCloudConfig = {
@@ -43,7 +43,7 @@ export const createHelpers = async (ctx: Ctx): Promise<THelpers> => {
         keyFilename: googleKeyFilename,
     });
 
-    const bucket = storage.bucket(googleBucketName);
+    const bucket = storage.bucket(googleBucketName!);
 
     return {
         findResources: async <R extends Resource>(resourceType: string, params: Record<string, string | number>) => {
