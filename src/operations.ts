@@ -204,6 +204,11 @@ export const apiGetData: TOperation = {
     handlerFn: async (req, { ctx, helpers }) => {
         const patientId = req.params.sessionId;
         const contents = await getDicomFileList(patientId, helpers.storage, helpers.config.googleCloud.bucketName);
-        return { resource: { contents } };
+        if (Array.isArray(contents.contents)) {
+            return { resource: { contents } };
+        } else {
+            console.error(contents)
+            return { status: 500 };
+        }
     },
 };
