@@ -1,10 +1,9 @@
 import * as dotenv from "dotenv";
-import { createCtx, createApp, startApp } from "@aidbox/node-server-sdk";
+import { createApp, createConfig, createCtx, startApp } from "@aidbox/node-server-sdk";
+import * as entities from "./entities.js";
 import { createHelpers } from "./helpers.js";
 import * as operations from "./operations.js";
 import * as subscriptions from "./subscriptions.js";
-import * as entities from "./entities.js";
-import { createConfig } from "@aidbox/node-server-sdk";
 
 const main = async () => {
     const config = createConfig();

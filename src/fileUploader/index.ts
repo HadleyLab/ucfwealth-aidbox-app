@@ -1,29 +1,21 @@
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { GetObjectCommand, S3Client, S3ClientConfig } from "@aws-sdk/client-s3";
-import { AwsConfig } from "../helpers";
+import { Bucket, File as GoogleFile } from "@google-cloud/storage";
+import { GoogleCloudConfig } from "../helpers";
 
-interface Params {
-    Bucket: string;
-    Prefix: string;
-}
-
-const signedUrlExpireSeconds = 60 * 5;
-
-export const getUrl = async (
-    name: string,
-    type: string,
-    s3: AWS.S3,
-    bucketName?: string
-) => {
+export const getUrl = async (name: string, type: string, storage: Bucket, bucketName?: string) => {
     try {
-        const url = await s3.getSignedUrlPromise("putObject", {
-            Bucket: bucketName,
-            Key: name,
-            Expires: signedUrlExpireSeconds,
-            ContentType: type,
-        });
-        console.log({ type: type });
-        console.log({ url });
+        if (!bucketName) {
+            throw new Error("Bucket name is not provided");
+        }
+
+        const options = {
+            version: "v4" as "v4",
+            action: "write" as "write",
+            expires: Date.now() + 15 * 60 * 1000,
+            contentType: type,
+        };
+
+        const [url] = await storage.file(name).getSignedUrl(options);
+        console.log({ type, url });
 
         return url;
     } catch (err) {
@@ -33,38 +25,23 @@ export const getUrl = async (
     }
 };
 
-export const getNamesWithPath = (data: AWS.S3.ListObjectsV2Output) => {
-    if (data === null) {
-        return;
-    }
-    return data
-        .Contents!.map((file: { Key?: string }) => file.Key)
-        .map((fullPath?: string) => {
-            if (fullPath) {
-                const namesArray = fullPath.split("/");
-                namesArray.shift();
-                let nameWithPath = namesArray.join("/");
-                if (nameWithPath[0] === "/") {
-                    nameWithPath = nameWithPath.replace(/^./, "");
-                }
-                return nameWithPath;
-            } else return "";
-        });
+export const getNamesWithPath = (files: GoogleFile[]) => {
+    return files.map((file) => {
+        const fullPath = file.name;
+        const namesArray = fullPath.split("/");
+        namesArray.shift();
+        let nameWithPath = namesArray.join("/");
+        if (nameWithPath[0] === "/") {
+            nameWithPath = nameWithPath.replace(/^./, "");
+        }
+        return nameWithPath;
+    });
 };
 
-export const getContents = async (params: Params, s3: AWS.S3) => {
+export const getContents = async (params: { prefix: string }, storage: Bucket) => {
     try {
-        const contents = await new Promise<any>((resolve, reject) => {
-            const result: string[][] = [];
-            s3.listObjectsV2(params).eachPage(function (err, data) {
-                if (err) reject(err);
-                result.push(getNamesWithPath(data)!);
-                if (data !== null && data.IsTruncated === false) {
-                    resolve(result.flat());
-                }
-                return true;
-            });
-        });
+        const [files] = await storage.getFiles({ prefix: params.prefix });
+        const contents = files.map((file) => file.name);
         console.log({ contents });
 
         return contents;
@@ -77,41 +54,41 @@ export const getContents = async (params: Params, s3: AWS.S3) => {
 
 export const getDicomFileList = async (
     patientId: string,
-    s3: AWS.S3,
+    storage: Bucket,
     bucketName?: string
-) => {
+): Promise<{ contents?: string[] }> => {
     if (!bucketName) {
         console.log("Bucket name does not exist");
         return {};
     }
-    const params = {
-        Bucket: bucketName,
-        Prefix: `${patientId}/`,
-    };
 
-    const contents = await getContents(params, s3);
-    console.log(contents);
-    return { contents };
+    try {
+        const contents = await getContents({ prefix: `${patientId}/` }, storage);
+        console.log(contents);
+        return { contents } as { contents: string[] };
+    } catch (error) {
+        console.error("Error fetching DICOM files:", error);
+        return {};
+    }
 };
 
-export const getDicomFileUrl = async (
-    filePathKey: string,
-    awsConfig: AwsConfig,
-) => {
-    const s3Configuration: S3ClientConfig = {
-        credentials: {
-            accessKeyId: String(awsConfig.accessKeyId),
-            secretAccessKey: String(awsConfig.secretAccessKey),
-        },
-        region: awsConfig.region,
-    };
-    console.log("region", awsConfig.region);
-    const s3 = new S3Client(s3Configuration);
-    const command = new GetObjectCommand({
-        Bucket: awsConfig.bucketName,
-        Key: filePathKey,
-    });
-    const url = await getSignedUrl(s3, command, { expiresIn: 15 * 60 });
-    console.log("Presigned URL: ", url);
-    return url;
+export const getDicomFileUrl = async (filePathKey: string, googleCloudConfig: GoogleCloudConfig, storage: Bucket) => {
+    try {
+        if (!googleCloudConfig.bucketName) {
+            throw new Error("Bucket name is not provided");
+        }
+
+        const options = {
+            version: "v4" as "v4",
+            action: "read" as "read",
+            expires: Date.now() + 15 * 60 * 1000,
+        };
+
+        const [url] = await storage.file(filePathKey).getSignedUrl(options);
+        console.log("Presigned URL: ", url);
+        return url;
+    } catch (err) {
+        console.error(err);
+        return err;
+    }
 };
