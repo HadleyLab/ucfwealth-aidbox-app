@@ -6,7 +6,6 @@ import { create, IPFS } from "ipfs-core";
 const dicomToPngUrl = process.env.DCM_TO_PNG_URL;
 const googleProjectId = process.env.GOOGLE_PROJECT_ID;
 const googleBucketName = process.env.GOOGLE_BUCKET_NAME;
-const googleKeyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
 export type GoogleCloudConfig = {
     projectId?: string;
@@ -40,7 +39,6 @@ export const createHelpers = async (ctx: Ctx): Promise<THelpers> => {
 
     const storage = new Storage({
         projectId: googleProjectId,
-        keyFilename: googleKeyFilename,
     });
 
     const bucket = storage.bucket(googleBucketName!);
@@ -67,7 +65,6 @@ export const createHelpers = async (ctx: Ctx): Promise<THelpers> => {
             googleCloud: {
                 projectId: googleProjectId,
                 bucketName: googleBucketName,
-                keyFilename: googleKeyFilename,
             },
             dicomToPngUrl,
         },
