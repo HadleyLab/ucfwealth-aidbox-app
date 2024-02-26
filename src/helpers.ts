@@ -1,7 +1,5 @@
 import { Ctx, ManifestOperation, ManifestSubscription, OperationRequestType, Resource } from "@aidbox/node-server-sdk";
 import { Storage, Bucket } from "@google-cloud/storage";
-//@ts-ignore
-import { create, IPFS } from "ipfs-core";
 
 const dicomToPngUrl = process.env.DCM_TO_PNG_URL;
 const googleProjectId = process.env.GOOGLE_PROJECT_ID;
@@ -20,7 +18,6 @@ export type THelpers = {
         params: Record<string, string | number>
     ): Promise<{ resources: R[]; total: number }>;
     getResource<R extends Resource>(resourceType: string, resourceId: string): Promise<R>;
-    node: Promise<IPFS>;
     storage: Bucket;
     config: {
         googleCloud: GoogleCloudConfig;
@@ -28,16 +25,7 @@ export type THelpers = {
     };
 };
 
-const initIPFS = async () => {
-    const node = await create({ repo: process.env.IPFS_PATH });
-    const version = await node.version();
-    console.log("ipfs run version", version.version);
-    return node;
-};
-
 export const createHelpers = async (ctx: Ctx): Promise<THelpers> => {
-    const node = initIPFS();
-
     const storage = new Storage({
         projectId: googleProjectId,
         keyFilename: googleKeyFilename,
@@ -61,7 +49,6 @@ export const createHelpers = async (ctx: Ctx): Promise<THelpers> => {
             });
             return resource;
         },
-        node,
         storage: bucket,
         config: {
             googleCloud: {
